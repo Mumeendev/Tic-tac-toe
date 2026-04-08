@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="chess-pieces-container" id="chess-pieces"></div>
+    
+    <div class="container">
+        <h1>Tic Tac Toe</h1>
+        
+        <div id="menu" class="menu">
+            <h2>Select Game Mode</h2>
+            <button class="mode-btn" id="two-player">Two Players</button>
+            <button class="mode-btn" id="ai-mode">vs Computer</button>
+        </div>
+
+        <div id="difficulty-menu" class="menu hidden">
+            <h2>Select Difficulty</h2>
+            <button class="mode-btn" id="easy">Easy</button>
+            <button class="mode-btn" id="medium">Medium</button>
+            <button class="mode-btn" id="hard">Hard</button>
+            <button class="mode-btn" id="back-to-mode">Back</button>
+        </div>
+
+        <div id="game" class="game hidden">
+            <div class="scoreboard">
+                <div class="score-item">
+                    <span class="score-label">❌ Wins</span>
+                    <span class="score-value" id="x-wins">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Draws</span>
+                    <span class="score-value" id="draws">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">⭕ Wins</span>
+                    <span class="score-value" id="o-wins">0</span>
+                </div>
+            </div>
+            <div class="status" id="status">Player ❌'s turn</div>
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+            <div class="buttons">
+                <button class="restart" id="restart">Restart Game</button>
+                <button class="restart" id="back-to-menu">Main Menu</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+    
+    <!-- Audio Elements -->
+    <audio id="bg-music" loop>
+        <source src="sound/tunetank-inspiring-cinematic-music-409347.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div class="sound-controls">
+        <button id="toggle-music" class="sound-btn">🔊</button>
+    </div>
+</body>
+</html>
