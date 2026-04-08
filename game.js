@@ -17,6 +17,7 @@ const oWinsDisplay = document.getElementById('o-wins');
 const drawsDisplay = document.getElementById('draws');
 const bgMusic = document.getElementById('bg-music');
 const toggleMusicBtn = document.getElementById('toggle-music');
+const replayBtn = document.getElementById('replay');
 
 // Web Audio API for sound effects
 let audioContext = null;
@@ -89,16 +90,17 @@ const winningConditions = [
 
 function startGame(mode) {
     gameMode = mode;
-    
+
     if (mode === 'ai') {
         menu.classList.add('hidden');
         difficultyMenu.classList.remove('hidden');
         return;
     }
-    
+
     gameActive = true;
     menu.classList.add('hidden');
     game.classList.remove('hidden');
+    hideReplayButton();
     restartGame();
 }
 
@@ -107,6 +109,7 @@ function startAIGame(difficulty) {
     gameActive = true;
     difficultyMenu.classList.add('hidden');
     game.classList.remove('hidden');
+    hideReplayButton();
     restartGame();
 }
 
@@ -161,7 +164,8 @@ function handleResultValidation() {
         gameActive = false;
         highlightWinningCells(winningCells);
         playWinSound();
-        
+        showReplayButton();
+
         // Update scores
         if (currentPlayer === 'X') {
             scores.xWins++;
@@ -179,6 +183,7 @@ function handleResultValidation() {
         scores.draws++;
         drawsDisplay.textContent = scores.draws;
         playDrawSound();
+        showReplayButton();
         return;
     }
 
@@ -202,6 +207,19 @@ function restartGame() {
         cell.textContent = '';
         cell.classList.remove('x', 'o', 'winner');
     });
+    hideReplayButton();
+}
+
+function showReplayButton() {
+    replayBtn.classList.remove('hidden');
+}
+
+function hideReplayButton() {
+    replayBtn.classList.add('hidden');
+}
+
+function replayGame() {
+    restartGame();
 }
 
 function backToMenuScreen() {
@@ -211,7 +229,8 @@ function backToMenuScreen() {
     menu.classList.remove('hidden');
     restartGame();
     gameActive = false;
-    
+    hideReplayButton();
+
     // Reset scores
     scores = { xWins: 0, oWins: 0, draws: 0 };
     xWinsDisplay.textContent = '0';
@@ -330,6 +349,7 @@ function checkWinner() {
 // Event Listeners
 cells.forEach(cell => cell.addEventListener('click', handleCellClick));
 restart.addEventListener('click', restartGame);
+replayBtn.addEventListener('click', replayGame);
 backToMenu.addEventListener('click', backToMenuScreen);
 aiModeBtn.addEventListener('click', () => startGame('ai'));
 twoPlayerBtn.addEventListener('click', () => startGame('two-player'));

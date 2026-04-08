@@ -312,6 +312,20 @@ h1::before {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
+#replay {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    animation: replayPulse 2s ease-in-out infinite;
+}
+
+#replay:hover {
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+}
+
+@keyframes replayPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
 .buttons {
     display: flex;
     gap: 1rem;
