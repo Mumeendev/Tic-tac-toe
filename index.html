@@ -9,8 +9,22 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-brand">🎮 Tic Tac Toe</div>
+        <div class="nav-links">
+            <button class="nav-btn active" id="nav-home">Home</button>
+            <button class="nav-btn" id="nav-play">Play</button>
+            <button class="nav-btn" id="nav-scores">Scores</button>
+            <button class="nav-btn" id="nav-about">About</button>
+        </div>
+        <div class="sound-controls">
+            <button id="toggle-music" class="sound-btn">🔊</button>
+        </div>
+    </nav>
+
     <div class="chess-pieces-container" id="chess-pieces"></div>
-    
+
     <div class="container">
         <h1>Tic Tac Toe</h1>
         
@@ -63,14 +77,10 @@
         </div>
     </div>
     <script src="game.js"></script>
-    
+
     <!-- Audio Elements -->
     <audio id="bg-music" loop>
         <source src="sound/tunetank-inspiring-cinematic-music-409347.mp3" type="audio/mpeg">
     </audio>
-    
-    <div class="sound-controls">
-        <button id="toggle-music" class="sound-btn">🔊</button>
-    </div>
 </body>
 </html>

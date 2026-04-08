@@ -502,3 +502,47 @@ function startMusic() {
 
 document.addEventListener('click', startMusic, { once: true });
 document.addEventListener('touchstart', startMusic, { once: true });
+
+// Initialize - hide replay button on page load
+hideReplayButton();
+
+// Navbar button functionality
+const navHome = document.getElementById('nav-home');
+const navPlay = document.getElementById('nav-play');
+const navScores = document.getElementById('nav-scores');
+const navAbout = document.getElementById('nav-about');
+
+function setActiveNav(activeBtn) {
+    [navHome, navPlay, navScores, navAbout].forEach(btn => {
+        btn.classList.remove('active');
+    });
+    activeBtn.classList.add('active');
+}
+
+navHome.addEventListener('click', () => {
+    setActiveNav(navHome);
+    backToMenuScreen();
+});
+
+navPlay.addEventListener('click', () => {
+    setActiveNav(navPlay);
+    if (game.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+    }
+});
+
+navScores.addEventListener('click', () => {
+    setActiveNav(navScores);
+    // Scroll to scoreboard if game is visible
+    if (!game.classList.contains('hidden')) {
+        document.querySelector('.scoreboard').scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
+navAbout.addEventListener('click', () => {
+    setActiveNav(navAbout);
+    alert('🎮 Tic Tac Toe\n\nFeatures:\n• Two Player Mode\n• AI with 3 difficulty levels\n• Sound Effects & Background Music\n• Score Tracking\n• Replay Button\n\nEnjoy the game!');
+});
+
+// Console log for debugging
+console.log('Game initialized. Click anywhere to enable sound.');
