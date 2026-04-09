@@ -95,7 +95,8 @@ let scores = {
 // Online mode variables
 let isOnlineHost = false;
 let onlineRoomCode = '';
-let onlineChannel = null;
+let peerInstance = null;
+let conn = null;
 let isOnlineReady = false;
 
 // Generate random room code
@@ -110,50 +111,160 @@ function generateRoomCode() {
 
 // Create room for online play
 function createRoom() {
+    // Show loading state
+    createRoomBtn.textContent = 'Creating Room...';
+    createRoomBtn.disabled = true;
+    
     onlineRoomCode = generateRoomCode();
     isOnlineHost = true;
-    roomCodeDisplay.textContent = onlineRoomCode;
-    roomCodeInput.classList.add('hidden');
-    roomCreated.classList.remove('hidden');
-    document.querySelector('.online-options').classList.add('hidden');
     
-    // Setup BroadcastChannel for local testing (in production, use WebSocket/server)
-    setupOnlineChannel(onlineRoomCode);
-    
-    console.log(`Room created: ${onlineRoomCode}`);
+    try {
+        // Initialize PeerJS with the room code as peer ID
+        peerInstance = new Peer(`tictactoe-${onlineRoomCode}`, {
+            debug: 2
+        });
+        
+        peerInstance.on('open', (id) => {
+            console.log('My peer ID is: ' + id);
+            roomCodeDisplay.textContent = onlineRoomCode;
+            roomCodeInput.classList.add('hidden');
+            roomCreated.classList.remove('hidden');
+            document.querySelector('.online-options').classList.add('hidden');
+            
+            status.textContent = 'Room created! Waiting for opponent...';
+            console.log(`Room created: ${onlineRoomCode}`);
+            
+            createRoomBtn.textContent = 'Create Room';
+            createRoomBtn.disabled = false;
+            
+            // Listen for incoming connections
+            peerInstance.on('connection', (connection) => {
+                conn = connection;
+                setupPeerConnection();
+                
+                showNotification('Opponent joined the game!');
+                status.textContent = 'Player ❌\'s turn (Online) - Opponent connected!';
+                isOnlineReady = true;
+                
+                // Auto-start game
+                setTimeout(() => {
+                    onlineMenu.classList.add('hidden');
+                    game.classList.remove('hidden');
+                    restartGame();
+                }, 1500);
+            });
+        });
+        
+        peerInstance.on('error', (err) => {
+            console.error('Peer error:', err);
+            alert('Failed to create room. Please try again.');
+            createRoomBtn.textContent = 'Create Room';
+            createRoomBtn.disabled = false;
+        });
+        
+    } catch (error) {
+        console.error('Error creating peer:', error);
+        alert('Failed to create room. Please try again.');
+        createRoomBtn.textContent = 'Create Room';
+        createRoomBtn.disabled = false;
+    }
 }
 
 // Join room for online play
 function joinRoom(code) {
-    onlineRoomCode = code.toUpperCase();
-    isOnlineHost = false;
-    roomCodeInput.classList.add('hidden');
-    document.querySelector('.online-options').classList.add('hidden');
+    const roomCode = code.toUpperCase();
     
-    // Setup BroadcastChannel
-    setupOnlineChannel(onlineRoomCode);
+    // Show loading state
+    confirmJoinBtn.textContent = 'Joining...';
+    confirmJoinBtn.disabled = true;
     
-    console.log(`Joined room: ${onlineRoomCode}`);
+    try {
+        // Initialize PeerJS
+        peerInstance = new Peer({
+            debug: 2
+        });
+        
+        peerInstance.on('open', (id) => {
+            console.log('My peer ID is: ' + id);
+            
+            // Connect to host
+            const hostId = `tictactoe-${roomCode}`;
+            conn = peerInstance.connect(hostId, {
+                reliable: true
+            });
+            
+            conn.on('open', () => {
+                console.log('Connected to host!');
+                setupPeerConnection();
+                
+                // Send join message
+                setTimeout(() => {
+                    sendData({ type: 'player_joined' });
+                }, 500);
+                
+                isOnlineHost = false;
+                isOnlineReady = true;
+                
+                confirmJoinBtn.textContent = 'Join';
+                confirmJoinBtn.disabled = false;
+                
+                // Start game
+                onlineMenu.classList.add('hidden');
+                game.classList.remove('hidden');
+                restartGame();
+                status.textContent = 'Connected! Player ❌ goes first';
+                showNotification('Connected to host!');
+            });
+            
+            conn.on('error', (err) => {
+                console.error('Connection error:', err);
+                alert('Failed to connect to room. Please check the code and try again.');
+                confirmJoinBtn.textContent = 'Join';
+                confirmJoinBtn.disabled = false;
+                roomCodeInput.classList.remove('hidden');
+                document.querySelector('.online-options').classList.remove('hidden');
+            });
+        });
+        
+        peerInstance.on('error', (err) => {
+            console.error('Peer error:', err);
+            alert('Failed to join room. Please try again.');
+            confirmJoinBtn.textContent = 'Join';
+            confirmJoinBtn.disabled = false;
+        });
+        
+    } catch (error) {
+        console.error('Error creating peer:', error);
+        alert('Failed to join room. Please try again.');
+        confirmJoinBtn.textContent = 'Join';
+        confirmJoinBtn.disabled = false;
+    }
 }
 
-// Setup communication channel
-function setupOnlineChannel(roomCode) {
-    // Using BroadcastChannel for same-browser testing
-    // For production, replace with WebSocket/Socket.io
-    onlineChannel = new BroadcastChannel(`tictactoe_${roomCode}`);
+// Setup peer connection handlers
+function setupPeerConnection() {
+    if (!conn) return;
     
-    onlineChannel.onmessage = (event) => {
-        const data = event.data;
+    conn.on('data', (data) => {
         handleOnlineMessage(data);
-    };
+    });
     
-    // If hosting, send ready signal
-    if (isOnlineHost) {
-        setTimeout(() => {
-            isOnlineReady = true;
-            onlineChannel.postMessage({ type: 'ready', player: 'X' });
-            status.textContent = 'Player ❌\'s turn (Online)';
-        }, 500);
+    conn.on('close', () => {
+        showNotification('Opponent disconnected!');
+        status.textContent = 'Opponent disconnected - Game paused';
+        isOnlineReady = false;
+    });
+    
+    conn.on('error', (err) => {
+        console.error('Connection error:', err);
+        showNotification('Connection error!');
+    });
+}
+
+// Send data to opponent
+function sendData(data) {
+    if (conn && conn.open) {
+        conn.send(data);
     }
 }
 
@@ -165,6 +276,8 @@ function handleOnlineMessage(data) {
         case 'ready':
             isOnlineReady = true;
             status.textContent = 'Player ❌\'s turn (Online)';
+            // Show connection notification
+            showNotification('Opponent connected!');
             break;
             
         case 'move':
@@ -183,19 +296,55 @@ function handleOnlineMessage(data) {
             
         case 'restart':
             restartOnlineGame();
+            showNotification('Opponent restarted the game');
+            break;
+            
+        case 'player_joined':
+            showNotification('Opponent joined the game!');
+            isOnlineReady = true;
             break;
     }
 }
 
 // Send move to opponent
 function sendOnlineMove(index) {
-    if (onlineChannel && isOnlineReady) {
-        onlineChannel.postMessage({
+    if (conn && conn.open && isOnlineReady) {
+        sendData({
             type: 'move',
             index: index,
             player: currentPlayer
         });
     }
+}
+
+// Show notification toast
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification-toast';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.9) 0%, rgba(30, 144, 255, 0.9) 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        animation: slideDownFade 0.3s ease-out;
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideUpFade 0.3s ease-in';
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
 }
 
 // Restart online game
@@ -210,8 +359,8 @@ function restartOnlineGame() {
     });
     hideReplayButton();
     
-    if (onlineChannel) {
-        onlineChannel.postMessage({ type: 'restart' });
+    if (conn && conn.open) {
+        sendData({ type: 'restart' });
     }
 }
 
@@ -357,12 +506,17 @@ function restartGame() {
     currentPlayer = 'X';
     gameState = ['', '', '', '', '', '', '', '', ''];
     gameActive = true;
-    status.textContent = `Player ❌'s turn`;
+    status.textContent = gameMode === 'online' ? `Player ❌'s turn (Online)` : `Player ❌'s turn`;
     cells.forEach(cell => {
         cell.textContent = '';
         cell.classList.remove('x', 'o', 'winner');
     });
     hideReplayButton();
+    
+    // If in online mode, notify opponent
+    if (gameMode === 'online' && conn && conn.open) {
+        sendData({ type: 'restart' });
+    }
 }
 
 function showReplayButton() {
@@ -393,16 +547,24 @@ function backToMenuScreen() {
     oWinsDisplay.textContent = '0';
     drawsDisplay.textContent = '0';
     
-    // Cleanup online channel
-    if (onlineChannel) {
-        onlineChannel.close();
-        onlineChannel = null;
+    // Cleanup online mode
+    if (peerInstance) {
+        peerInstance.destroy();
+        peerInstance = null;
+    }
+    if (conn) {
+        conn.close();
+        conn = null;
     }
     isOnlineHost = false;
     isOnlineReady = false;
     roomCreated.classList.add('hidden');
     roomCodeInput.classList.add('hidden');
     document.querySelector('.online-options').classList.remove('hidden');
+    createRoomBtn.textContent = 'Create Room';
+    createRoomBtn.disabled = false;
+    confirmJoinBtn.textContent = 'Join';
+    confirmJoinBtn.disabled = false;
 }
 
 function backToModeSelection() {
@@ -536,10 +698,6 @@ confirmJoinBtn.addEventListener('click', () => {
     const code = roomCodeField.value.trim();
     if (code.length === 6) {
         joinRoom(code);
-        gameMode = 'online';
-        game.classList.remove('hidden');
-        onlineMenu.classList.add('hidden');
-        restartGame();
     } else {
         alert('Please enter a valid 6-character room code');
     }
@@ -557,20 +715,30 @@ copyCodeBtn.addEventListener('click', () => {
     });
 });
 cancelRoomBtn.addEventListener('click', () => {
-    if (onlineChannel) {
-        onlineChannel.close();
-        onlineChannel = null;
+    if (peerInstance) {
+        peerInstance.destroy();
+        peerInstance = null;
+    }
+    if (conn) {
+        conn.close();
+        conn = null;
     }
     isOnlineHost = false;
     isOnlineReady = false;
     roomCreated.classList.add('hidden');
     roomCodeInput.classList.add('hidden');
     document.querySelector('.online-options').classList.remove('hidden');
+    createRoomBtn.textContent = 'Create Room';
+    createRoomBtn.disabled = false;
 });
 backToMenuOnline.addEventListener('click', () => {
-    if (onlineChannel) {
-        onlineChannel.close();
-        onlineChannel = null;
+    if (peerInstance) {
+        peerInstance.destroy();
+        peerInstance = null;
+    }
+    if (conn) {
+        conn.close();
+        conn = null;
     }
     isOnlineHost = false;
     isOnlineReady = false;
@@ -579,6 +747,10 @@ backToMenuOnline.addEventListener('click', () => {
     roomCodeInput.classList.add('hidden');
     document.querySelector('.online-options').classList.remove('hidden');
     menu.classList.remove('hidden');
+    createRoomBtn.textContent = 'Create Room';
+    createRoomBtn.disabled = false;
+    confirmJoinBtn.textContent = 'Join';
+    confirmJoinBtn.disabled = false;
 });
 
 // Floating Chess Pieces Background
