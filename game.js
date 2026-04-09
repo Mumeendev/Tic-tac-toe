@@ -7,7 +7,9 @@ const menu = document.getElementById('menu');
 const game = document.getElementById('game');
 const aiModeBtn = document.getElementById('ai-mode');
 const twoPlayerBtn = document.getElementById('two-player');
+const onlineModeBtn = document.getElementById('online-mode');
 const difficultyMenu = document.getElementById('difficulty-menu');
+const onlineMenu = document.getElementById('online-menu');
 const easyBtn = document.getElementById('easy');
 const mediumBtn = document.getElementById('medium');
 const hardBtn = document.getElementById('hard');
@@ -18,6 +20,19 @@ const drawsDisplay = document.getElementById('draws');
 const bgMusic = document.getElementById('bg-music');
 const toggleMusicBtn = document.getElementById('toggle-music');
 const replayBtn = document.getElementById('replay');
+
+// Online mode elements
+const createRoomBtn = document.getElementById('create-room');
+const joinRoomBtn = document.getElementById('join-room');
+const roomCodeInput = document.getElementById('room-code-input');
+const roomCodeField = document.getElementById('room-code');
+const confirmJoinBtn = document.getElementById('confirm-join');
+const cancelJoinBtn = document.getElementById('cancel-join');
+const roomCreated = document.getElementById('room-created');
+const roomCodeDisplay = document.getElementById('room-code-display');
+const copyCodeBtn = document.getElementById('copy-code');
+const cancelRoomBtn = document.getElementById('cancel-room');
+const backToMenuOnline = document.getElementById('back-to-menu-online');
 
 // Web Audio API for sound effects
 let audioContext = null;
@@ -69,13 +84,136 @@ function ensureAudioReady() {
 let currentPlayer = 'X';
 let gameState = ['', '', '', '', '', '', '', '', ''];
 let gameActive = false;
-let gameMode = ''; // 'ai' or 'two-player'
+let gameMode = ''; // 'ai', 'two-player', or 'online'
 let aiDifficulty = ''; // 'easy', 'medium', or 'hard'
 let scores = {
     xWins: 0,
     oWins: 0,
     draws: 0
 };
+
+// Online mode variables
+let isOnlineHost = false;
+let onlineRoomCode = '';
+let onlineChannel = null;
+let isOnlineReady = false;
+
+// Generate random room code
+function generateRoomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
+// Create room for online play
+function createRoom() {
+    onlineRoomCode = generateRoomCode();
+    isOnlineHost = true;
+    roomCodeDisplay.textContent = onlineRoomCode;
+    roomCodeInput.classList.add('hidden');
+    roomCreated.classList.remove('hidden');
+    document.querySelector('.online-options').classList.add('hidden');
+    
+    // Setup BroadcastChannel for local testing (in production, use WebSocket/server)
+    setupOnlineChannel(onlineRoomCode);
+    
+    console.log(`Room created: ${onlineRoomCode}`);
+}
+
+// Join room for online play
+function joinRoom(code) {
+    onlineRoomCode = code.toUpperCase();
+    isOnlineHost = false;
+    roomCodeInput.classList.add('hidden');
+    document.querySelector('.online-options').classList.add('hidden');
+    
+    // Setup BroadcastChannel
+    setupOnlineChannel(onlineRoomCode);
+    
+    console.log(`Joined room: ${onlineRoomCode}`);
+}
+
+// Setup communication channel
+function setupOnlineChannel(roomCode) {
+    // Using BroadcastChannel for same-browser testing
+    // For production, replace with WebSocket/Socket.io
+    onlineChannel = new BroadcastChannel(`tictactoe_${roomCode}`);
+    
+    onlineChannel.onmessage = (event) => {
+        const data = event.data;
+        handleOnlineMessage(data);
+    };
+    
+    // If hosting, send ready signal
+    if (isOnlineHost) {
+        setTimeout(() => {
+            isOnlineReady = true;
+            onlineChannel.postMessage({ type: 'ready', player: 'X' });
+            status.textContent = 'Player ❌\'s turn (Online)';
+        }, 500);
+    }
+}
+
+// Handle online messages
+function handleOnlineMessage(data) {
+    console.log('Received:', data);
+    
+    switch(data.type) {
+        case 'ready':
+            isOnlineReady = true;
+            status.textContent = 'Player ❌\'s turn (Online)';
+            break;
+            
+        case 'move':
+            // Apply opponent's move
+            const cell = document.querySelector(`[data-index="${data.index}"]`);
+            const emoji = data.player === 'X' ? '❌' : '⭕';
+            cell.textContent = emoji;
+            cell.classList.add(data.player.toLowerCase());
+            gameState[data.index] = data.player;
+            
+            // Switch turn
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            const turnEmoji = currentPlayer === 'X' ? '❌' : '⭕';
+            status.textContent = `Player ${turnEmoji}'s turn`;
+            break;
+            
+        case 'restart':
+            restartOnlineGame();
+            break;
+    }
+}
+
+// Send move to opponent
+function sendOnlineMove(index) {
+    if (onlineChannel && isOnlineReady) {
+        onlineChannel.postMessage({
+            type: 'move',
+            index: index,
+            player: currentPlayer
+        });
+    }
+}
+
+// Restart online game
+function restartOnlineGame() {
+    currentPlayer = 'X';
+    gameState = ['', '', '', '', '', '', '', '', ''];
+    gameActive = true;
+    status.textContent = `Player ❌'s turn (Online)`;
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('x', 'o', 'winner');
+    });
+    hideReplayButton();
+    
+    if (onlineChannel) {
+        onlineChannel.postMessage({ type: 'restart' });
+    }
+}
 
 const winningConditions = [
     [0, 1, 2],
@@ -97,6 +235,12 @@ function startGame(mode) {
         return;
     }
 
+    if (mode === 'online') {
+        menu.classList.add('hidden');
+        onlineMenu.classList.remove('hidden');
+        return;
+    }
+
     gameActive = true;
     menu.classList.add('hidden');
     game.classList.remove('hidden');
@@ -115,7 +259,7 @@ function startAIGame(difficulty) {
 
 function handleCellClick(e) {
     initAudio(); // Initialize audio on cell click
-    
+
     const clickedCell = e.target;
     const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
 
@@ -128,8 +272,19 @@ function handleCellClick(e) {
         return;
     }
 
+    // In online mode, prevent clicking during opponent's turn
+    if (gameMode === 'online' && currentPlayer === 'O') {
+        return;
+    }
+
     handleCellPlayed(clickedCell, clickedCellIndex);
     playClickSound();
+    
+    // Send move to opponent in online mode
+    if (gameMode === 'online') {
+        sendOnlineMove(clickedCellIndex);
+    }
+    
     handleResultValidation();
 
     // AI move after player's turn
@@ -226,6 +381,7 @@ function backToMenuScreen() {
     gameActive = false;
     game.classList.add('hidden');
     difficultyMenu.classList.add('hidden');
+    onlineMenu.classList.add('hidden');
     menu.classList.remove('hidden');
     restartGame();
     gameActive = false;
@@ -236,6 +392,17 @@ function backToMenuScreen() {
     xWinsDisplay.textContent = '0';
     oWinsDisplay.textContent = '0';
     drawsDisplay.textContent = '0';
+    
+    // Cleanup online channel
+    if (onlineChannel) {
+        onlineChannel.close();
+        onlineChannel = null;
+    }
+    isOnlineHost = false;
+    isOnlineReady = false;
+    roomCreated.classList.add('hidden');
+    roomCodeInput.classList.add('hidden');
+    document.querySelector('.online-options').classList.remove('hidden');
 }
 
 function backToModeSelection() {
@@ -353,22 +520,78 @@ replayBtn.addEventListener('click', replayGame);
 backToMenu.addEventListener('click', backToMenuScreen);
 aiModeBtn.addEventListener('click', () => startGame('ai'));
 twoPlayerBtn.addEventListener('click', () => startGame('two-player'));
+onlineModeBtn.addEventListener('click', () => startGame('online'));
 easyBtn.addEventListener('click', () => startAIGame('easy'));
 mediumBtn.addEventListener('click', () => startAIGame('medium'));
 hardBtn.addEventListener('click', () => startAIGame('hard'));
 backToModeBtn.addEventListener('click', backToModeSelection);
 
+// Online mode event listeners
+createRoomBtn.addEventListener('click', createRoom);
+joinRoomBtn.addEventListener('click', () => {
+    document.querySelector('.online-options').classList.add('hidden');
+    roomCodeInput.classList.remove('hidden');
+});
+confirmJoinBtn.addEventListener('click', () => {
+    const code = roomCodeField.value.trim();
+    if (code.length === 6) {
+        joinRoom(code);
+        gameMode = 'online';
+        game.classList.remove('hidden');
+        onlineMenu.classList.add('hidden');
+        restartGame();
+    } else {
+        alert('Please enter a valid 6-character room code');
+    }
+});
+cancelJoinBtn.addEventListener('click', () => {
+    roomCodeInput.classList.add('hidden');
+    document.querySelector('.online-options').classList.remove('hidden');
+});
+copyCodeBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(onlineRoomCode).then(() => {
+        copyCodeBtn.textContent = 'Copied!';
+        setTimeout(() => {
+            copyCodeBtn.textContent = 'Copy Code';
+        }, 2000);
+    });
+});
+cancelRoomBtn.addEventListener('click', () => {
+    if (onlineChannel) {
+        onlineChannel.close();
+        onlineChannel = null;
+    }
+    isOnlineHost = false;
+    isOnlineReady = false;
+    roomCreated.classList.add('hidden');
+    roomCodeInput.classList.add('hidden');
+    document.querySelector('.online-options').classList.remove('hidden');
+});
+backToMenuOnline.addEventListener('click', () => {
+    if (onlineChannel) {
+        onlineChannel.close();
+        onlineChannel = null;
+    }
+    isOnlineHost = false;
+    isOnlineReady = false;
+    onlineMenu.classList.add('hidden');
+    roomCreated.classList.add('hidden');
+    roomCodeInput.classList.add('hidden');
+    document.querySelector('.online-options').classList.remove('hidden');
+    menu.classList.remove('hidden');
+});
+
 // Floating Chess Pieces Background
 function createFloatingChessPieces() {
     const container = document.getElementById('chess-pieces');
-    const chessEmojis = ['♔', '♕', '♖', '♗', '♘', '♙', '♚', '♛', '♜', '♝', '♞', '♟'];
-    const numberOfPieces = 20;
+    const chessEmojis = ['⭐', '🌟', '✨', '💫', '🌠', '🪐', '🌌', '🔮', '🌙', '☄️'];
+    const numberOfPieces = 25;
 
     for (let i = 0; i < numberOfPieces; i++) {
         const piece = document.createElement('div');
         piece.classList.add('chess-piece');
         piece.textContent = chessEmojis[Math.floor(Math.random() * chessEmojis.length)];
-        
+
         // Random position and animation properties
         const leftPosition = Math.random() * 100;
         const animationDuration = 10 + Math.random() * 20; // 10-30 seconds
@@ -386,8 +609,48 @@ function createFloatingChessPieces() {
     }
 }
 
+// Shooting Stars Effect
+function createShootingStars() {
+    const container = document.body;
+    const numberOfStars = 5;
+
+    for (let i = 0; i < numberOfStars; i++) {
+        setInterval(() => {
+            const star = document.createElement('div');
+            star.style.position = 'fixed';
+            star.style.width = '100px';
+            star.style.height = '2px';
+            star.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.8), transparent)';
+            star.style.borderRadius = '50%';
+            star.style.pointerEvents = 'none';
+            star.style.zIndex = '1';
+            
+            // Random starting position
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * (window.innerHeight / 2);
+            star.style.left = `${startX}px`;
+            star.style.top = `${startY}px`;
+            star.style.transform = `rotate(${35 + Math.random() * 10}deg)`;
+            
+            container.appendChild(star);
+            
+            // Animate and remove
+            star.animate([
+                { transform: `rotate(40deg) translateX(0)`, opacity: 1 },
+                { transform: `rotate(40deg) translateX(300px)`, opacity: 0 }
+            ], {
+                duration: 1000 + Math.random() * 500,
+                easing: 'ease-out'
+            }).onfinish = () => star.remove();
+        }, 3000 + Math.random() * 4000); // Every 3-7 seconds
+    }
+}
+
 // Initialize floating chess pieces on page load
 createFloatingChessPieces();
+
+// Initialize shooting stars
+createShootingStars();
 
 // Sound Effects using Web Audio API
 function playClickSound() {

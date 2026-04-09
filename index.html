@@ -30,8 +30,26 @@
         
         <div id="menu" class="menu">
             <h2>Select Game Mode</h2>
-            <button class="mode-btn" id="two-player">Two Players</button>
-            <button class="mode-btn" id="ai-mode">vs Computer</button>
+            <div class="mode-cards">
+                <div class="mode-card" id="two-player">
+                    <div class="card-icon">👥</div>
+                    <h3>Two Players</h3>
+                    <p>Play locally with a friend</p>
+                    <div class="card-glow"></div>
+                </div>
+                <div class="mode-card" id="ai-mode">
+                    <div class="card-icon">🤖</div>
+                    <h3>vs Computer</h3>
+                    <p>Challenge the AI</p>
+                    <div class="card-glow"></div>
+                </div>
+                <div class="mode-card" id="online-mode">
+                    <div class="card-icon">🌐</div>
+                    <h3>Online</h3>
+                    <p>Play with friends remotely</p>
+                    <div class="card-glow"></div>
+                </div>
+            </div>
         </div>
 
         <div id="difficulty-menu" class="menu hidden">
@@ -40,6 +58,37 @@
             <button class="mode-btn" id="medium">Medium</button>
             <button class="mode-btn" id="hard">Hard</button>
             <button class="mode-btn" id="back-to-mode">Back</button>
+        </div>
+
+        <div id="online-menu" class="menu hidden">
+            <h2>Online Multiplayer</h2>
+            <div class="online-options">
+                <div class="online-card" id="create-room">
+                    <div class="card-icon">🎮</div>
+                    <h3>Create Room</h3>
+                    <p>Start a new game and invite a friend</p>
+                </div>
+                <div class="online-card" id="join-room">
+                    <div class="card-icon">🚪</div>
+                    <h3>Join Room</h3>
+                    <p>Enter a room code to join</p>
+                </div>
+            </div>
+            <div id="room-code-input" class="hidden">
+                <input type="text" id="room-code" placeholder="Enter room code..." maxlength="6" class="cosmic-input">
+                <button class="mode-btn" id="confirm-join">Join</button>
+                <button class="mode-btn" id="cancel-join">Back</button>
+            </div>
+            <div id="room-created" class="hidden">
+                <div class="room-info">
+                    <p>Share this code with your friend:</p>
+                    <div class="room-code-display" id="room-code-display"></div>
+                    <button class="mode-btn" id="copy-code">Copy Code</button>
+                    <p class="waiting-text">Waiting for opponent...</p>
+                </div>
+                <button class="mode-btn" id="cancel-room">Back</button>
+            </div>
+            <button class="mode-btn" id="back-to-menu-online">Back</button>
         </div>
 
         <div id="game" class="game hidden">

@@ -33,7 +33,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -43,6 +43,73 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
+}
+
+/* Stars background - Multiple layers for depth */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        /* Small distant stars */
+        radial-gradient(1px 1px at 10px 20px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 30px 50px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 70px 90px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 100px 40px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 120px 150px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 180px 60px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 220px 110px, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 280px 30px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 310px 170px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 370px 80px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 400px 130px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 460px 50px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 510px 190px, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 580px 70px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 620px 140px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 690px 90px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 730px 160px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 790px 40px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 850px 120px, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 880px 180px, rgba(255,255,255,0.5), transparent);
+    background-size: 900px 200px;
+    animation: twinkle 10s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Nebula effect */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(30, 144, 255, 0.2) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255, 20, 147, 0.12) 0%, transparent 55%),
+        radial-gradient(circle at 30% 80%, rgba(0, 255, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 70% 20%, rgba(255, 165, 0, 0.1) 0%, transparent 35%);
+    animation: nebulaShift 25s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.5; filter: brightness(1); }
+    50% { opacity: 1; filter: brightness(1.3); }
+}
+
+@keyframes nebulaShift {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+    33% { transform: scale(1.05) rotate(2deg); opacity: 0.9; }
+    66% { transform: scale(0.98) rotate(-2deg); opacity: 0.8; }
+    50% { transform: scale(1.08) rotate(3deg); opacity: 1; }
 }
 
 .chess-pieces-container {
@@ -137,30 +204,32 @@ body {
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2.5rem;
-    border-radius: 30px;
-    box-shadow: 0 0 40px rgba(102, 126, 234, 0.4),
-                0 20px 60px rgba(0, 0, 0, 0.3),
-                inset 0 0 60px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3rem;
+    border-radius: 35px;
+    box-shadow: 0 0 60px rgba(102, 126, 234, 0.3),
+                0 20px 80px rgba(0, 0, 0, 0.4),
+                inset 0 0 80px rgba(255, 255, 255, 0.05);
     text-align: center;
     position: relative;
     z-index: 1;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    animation: containerGlow 3s ease-in-out infinite;
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    animation: containerGlow 4s ease-in-out infinite;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 @keyframes containerGlow {
     0%, 100% { 
-        box-shadow: 0 0 40px rgba(102, 126, 234, 0.4),
-                    0 20px 60px rgba(0, 0, 0, 0.3),
-                    inset 0 0 60px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 60px rgba(102, 126, 234, 0.3),
+                    0 20px 80px rgba(0, 0, 0, 0.4),
+                    inset 0 0 80px rgba(255, 255, 255, 0.05);
     }
     50% { 
-        box-shadow: 0 0 60px rgba(118, 75, 162, 0.6),
-                    0 25px 70px rgba(0, 0, 0, 0.4),
-                    inset 0 0 80px rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 80px rgba(118, 75, 162, 0.5),
+                    0 25px 100px rgba(0, 0, 0, 0.5),
+                    inset 0 0 100px rgba(255, 255, 255, 0.08);
     }
 }
 
@@ -174,10 +243,10 @@ body {
     bottom: -3px;
     background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff, #5f27cd);
     background-size: 400% 400%;
-    border-radius: 32px;
+    border-radius: 37px;
     z-index: -1;
-    animation: neonBorder 4s ease infinite;
-    opacity: 0.7;
+    animation: neonBorder 5s ease infinite;
+    opacity: 0.5;
 }
 
 @keyframes neonBorder {
@@ -193,11 +262,11 @@ h1 {
     -webkit-background-clip: text;
     background-clip: text;
     animation: gradientShift 3s ease infinite, titlePulse 2s ease-in-out infinite;
-    margin-bottom: 1rem;
-    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    font-size: 3.5rem;
     text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+    letter-spacing: 5px;
+    text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
     position: relative;
 }
 
@@ -207,11 +276,12 @@ h1::after {
     bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
+    width: 150px;
     height: 4px;
     background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
     border-radius: 2px;
     animation: lineExpand 2s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
 }
 
 @keyframes gradientShift {
@@ -222,34 +292,309 @@ h1::after {
 
 @keyframes titlePulse {
     0%, 100% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.05); filter: brightness(1.2); }
+    50% { transform: scale(1.05); filter: brightness(1.3); }
 }
 
 @keyframes lineExpand {
-    0%, 100% { width: 100px; opacity: 0.7; }
-    50% { width: 150px; opacity: 1; }
+    0%, 100% { width: 150px; opacity: 0.7; }
+    50% { width: 200px; opacity: 1; }
 }
 
 /* Sparkle effect for title */
 h1::before {
     content: '✨';
     position: absolute;
-    left: -30px;
+    left: -40px;
     top: 50%;
     transform: translateY(-50%);
     animation: sparkle 1.5s ease-in-out infinite;
-    font-size: 1.5rem;
+    font-size: 2rem;
 }
 
-@keyframes sparkle {
-    0%, 100% { opacity: 0; transform: translateY(-50%) scale(0.5) rotate(0deg); }
-    50% { opacity: 1; transform: translateY(-50%) scale(1.2) rotate(180deg); }
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 4px;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+    border-radius: 2px;
+    animation: lineExpand 2s ease-in-out infinite;
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
 }
 
+/* Subtitle */
 .menu h2 {
-    color: #555;
+    color: #fff;
+    margin-bottom: 2.5rem;
+    font-size: 1.8rem;
+    text-shadow: 0 0 20px rgba(138, 43, 226, 0.8), 0 0 40px rgba(30, 144, 255, 0.5);
+    letter-spacing: 2px;
+    position: relative;
+    display: inline-block;
+}
+
+.menu h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(138, 43, 226, 0.8), rgba(30, 144, 255, 0.8));
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(138, 43, 226, 0.6);
+}
+
+/* Mode Cards Container */
+.mode-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 2rem;
     margin-bottom: 2rem;
-    font-size: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.mode-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(30, 144, 255, 0.2) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 3rem 2.5rem;
+    min-width: 280px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.mode-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(138, 43, 226, 0.3), transparent, rgba(30, 144, 255, 0.3), transparent);
+    animation: rotateBorder 4s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mode-card:hover::before {
+    opacity: 1;
+}
+
+@keyframes rotateBorder {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(138, 43, 226, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.mode-card:hover .card-glow {
+    opacity: 1;
+}
+
+.mode-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 15px 50px rgba(138, 43, 226, 0.5),
+                0 0 30px rgba(30, 144, 255, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+.card-icon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.6));
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.mode-card h3 {
+    color: #fff;
+    font-size: 1.6rem;
+    margin-bottom: 0.7rem;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.mode-card p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.05rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Different gradient for each card */
+.mode-card:nth-child(1) {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+}
+
+.mode-card:nth-child(1) .card-glow {
+    background: radial-gradient(circle at center, rgba(102, 126, 234, 0.4) 0%, transparent 70%);
+}
+
+.mode-card:nth-child(2) {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.25) 0%, rgba(75, 0, 130, 0.25) 100%);
+}
+
+.mode-card:nth-child(2) .card-glow {
+    background: radial-gradient(circle at center, rgba(138, 43, 226, 0.4) 0%, transparent 70%);
+}
+
+.mode-card:nth-child(3) {
+    background: linear-gradient(135deg, rgba(30, 144, 255, 0.25) 0%, rgba(0, 191, 255, 0.25) 100%);
+}
+
+.mode-card:nth-child(3) .card-glow {
+    background: radial-gradient(circle at center, rgba(30, 144, 255, 0.4) 0%, transparent 70%);
+}
+
+/* Online Menu Styles */
+.online-options {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.online-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 191, 255, 0.2) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 3rem 2.5rem;
+    min-width: 280px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.online-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    border-color: rgba(0, 255, 255, 0.6);
+    box-shadow: 0 15px 50px rgba(0, 255, 255, 0.4),
+                0 0 30px rgba(0, 191, 255, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+.online-card .card-icon {
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.7));
+}
+
+.online-card h3 {
+    color: #fff;
+    font-size: 1.6rem;
+    margin-bottom: 0.7rem;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.online-card p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.05rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+#room-code-input, #room-created {
+    margin-top: 1.5rem;
+}
+
+.cosmic-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 255, 0.4);
+    border-radius: 12px;
+    color: #fff;
+    outline: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    margin-bottom: 1rem;
+}
+
+.cosmic-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cosmic-input:focus {
+    border-color: rgba(0, 255, 255, 0.8);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.room-info {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(30, 144, 255, 0.2) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.room-info p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.room-code-display {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    border-radius: 10px;
+    letter-spacing: 8px;
+    margin: 1rem 0;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.waiting-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .mode-btn {
@@ -305,9 +650,13 @@ h1::before {
     display: flex;
     justify-content: space-around;
     margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-radius: 10px;
+    padding: 1.2rem;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(30, 144, 255, 0.15) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
 }
 
 .score-item {
@@ -318,21 +667,30 @@ h1::before {
 
 .score-label {
     font-size: 0.9rem;
-    color: #666;
+    color: #fff;
     margin-bottom: 0.3rem;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .score-value {
     font-size: 1.8rem;
     font-weight: bold;
-    color: #333;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(138, 43, 226, 0.8), 0 0 30px rgba(30, 144, 255, 0.5);
 }
 
 .status {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
-    color: #555;
+    color: #fff;
     font-weight: 600;
+    text-shadow: 0 0 20px rgba(138, 43, 226, 0.8), 0 0 40px rgba(30, 144, 255, 0.5);
+    animation: statusGlow 3s ease-in-out infinite;
+}
+
+@keyframes statusGlow {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; text-shadow: 0 0 30px rgba(138, 43, 226, 1), 0 0 50px rgba(30, 144, 255, 0.7); }
 }
 
 .board {
@@ -340,74 +698,157 @@ h1::before {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     margin-bottom: 1.5rem;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(138, 43, 226, 0.1) 100%);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3),
+                inset 0 0 30px rgba(138, 43, 226, 0.1);
 }
 
 .cell {
     width: 100px;
     height: 100px;
-    background: #f0f0f0;
-    border: none;
-    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(138, 43, 226, 0.08) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
     font-size: 3rem;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
+                inset 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.cell::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(138, 43, 226, 0.2), transparent, rgba(30, 144, 255, 0.2), transparent);
+    animation: rotateBorder 6s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.cell:hover::before {
+    opacity: 1;
 }
 
 .cell:hover {
-    background: #e0e0e0;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(138, 43, 226, 0.15) 100%);
+    transform: scale(1.08);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 30px rgba(138, 43, 226, 0.4),
+                0 0 20px rgba(30, 144, 255, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .cell.x {
     color: #667eea;
+    text-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 40px rgba(102, 126, 234, 0.5);
+    animation: pieceAppear 0.5s ease-out;
 }
 
 .cell.o {
     color: #764ba2;
+    text-shadow: 0 0 20px rgba(118, 75, 162, 0.8), 0 0 40px rgba(118, 75, 162, 0.5);
+    animation: pieceAppear 0.5s ease-out;
+}
+
+@keyframes pieceAppear {
+    0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 .cell.winner {
-    background: #ffd700;
-    animation: pulse 0.5s ease-in-out;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.5) 100%);
+    border-color: rgba(255, 215, 0, 0.8);
+    animation: winnerPulse 1s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6),
+                0 10px 30px rgba(255, 215, 0, 0.4),
+                inset 0 0 30px rgba(255, 215, 0, 0.2);
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+@keyframes winnerPulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 10px 30px rgba(255, 215, 0, 0.4);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 15px 40px rgba(255, 215, 0, 0.6);
+    }
 }
 
 .restart {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
     color: white;
-    border: none;
+    border: 2px solid rgba(255, 255, 255, 0.3);
     padding: 1rem 2rem;
     font-size: 1.2rem;
-    border-radius: 10px;
+    font-weight: 700;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4),
+                inset 0 0 15px rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.restart::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.restart:hover::before {
+    left: 100%;
 }
 
 .restart:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6),
+                0 0 20px rgba(118, 75, 162, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 #replay {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%);
     animation: replayPulse 2s ease-in-out infinite;
 }
 
 #replay:hover {
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6),
+                0 0 25px rgba(16, 185, 129, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
 @keyframes replayPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.03); }
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+    }
+    50% { 
+        transform: scale(1.03);
+        box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6), 0 0 25px rgba(16, 185, 129, 0.5);
+    }
 }
 
 .buttons {
